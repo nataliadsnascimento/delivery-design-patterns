@@ -1,0 +1,1 @@
+"""Singleton: Configuracao (#4)"""

@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Banco de dados gerado ao rodar o projeto
+*.db
+
+# Editores
+.idea/
+.vscode/
+.DS_Store
