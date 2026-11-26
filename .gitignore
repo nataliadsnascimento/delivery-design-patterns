@@ -12,3 +12,9 @@ venv/
 .idea/
 .vscode/
 .DS_Store
+
+# Banco de dados SQLite
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
