@@ -6,31 +6,35 @@ from database.conexao import ConexaoBanco
 from models.itens import Bebida, Hamburguer, Pizza, Sobremesa
 from repositories.produto_repository import ProdutoRepository
 
+
 SCHEMA_PATH = (
     Path(__file__).resolve().parents[1]
     / "database"
     / "schema.sql"
 )
 
+
 @pytest.fixture
 def conexao():
+
     ConexaoBanco.fechar()
 
-    conexao = ConexaoBanco.obter()
+    conexao = ConexaoBanco.obter(":memory:")
 
     try:
         schema = SCHEMA_PATH.read_text(encoding="utf-8")
-        conexao.execute(schema)
+        conexao.executescript(schema)
 
         yield conexao
 
     finally:
         ConexaoBanco.fechar()
 
+
 @pytest.fixture
 def repository(conexao):
 
-    conexao.executemany(""""
+    conexao.executemany("""
         INSERT INTO produto (nome, categoria, preco)
         VALUES (?, ?, ?)
     """, [
@@ -42,6 +46,7 @@ def repository(conexao):
     conexao.commit()
 
     return ProdutoRepository()
+
 
 @pytest.mark.parametrize("id, classe", [
     (1, Hamburguer),
@@ -64,8 +69,10 @@ def test_buscar_produto(repository):
     assert resultado.descricao() == "Pizza Mussarela"
     assert resultado.preco() == 45.0
 
+
 def test_buscar_produto_inexistente(repository):
     assert repository.buscar(999) is None
+
 
 def test_listar_cardapio(repository):
     cardapio = repository.listar_cardapio()
@@ -77,18 +84,21 @@ def test_listar_cardapio(repository):
     assert cardapio[0].descricao() == "Hambúrguer Artesanal"
     assert cardapio[3].preco() == 12.0
 
+
 def test_listar_cardapio_vazio(conexao):
     assert ProdutoRepository().listar_cardapio() == []
 
-def test_categoria_desconhecida(repository):
+
+def test_categoria_desconhecida(conexao):
     conexao.execute("""
-                    INSERT INTO produto (nome, categoria, preco)
-                    VALUES ('Sorvete', 'categoria_inexistente', 10.0)
-                    """)
+        INSERT INTO produto (nome, categoria, preco)
+        VALUES ('Sorvete', 'categoria_inexistente', 10.0)
+    """)
     conexao.commit()
 
     with pytest.raises(ValueError):
         ProdutoRepository().buscar(1)
+
 
 def test_consulta_parametrizada(repository):
     assert repository.buscar("1 OR 1=1") is None
