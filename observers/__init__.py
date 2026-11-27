@@ -1,1 +1,0 @@
-"""Observer: notificadores e log (#16, #17, #18)"""
