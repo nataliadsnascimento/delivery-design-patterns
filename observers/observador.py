@@ -22,7 +22,7 @@ def _status_legivel(status: str) -> str:
 
 def _numero(pedido: "Pedido") -> str:                  
     return f"#{pedido.id}" if pedido.id is not None else "(novo)"
-    #      pedido ainda não salvo no banco tem id None, então evitamos "#None"
+   
 
 
 class NotificadorCliente(Observador):                  
@@ -34,6 +34,31 @@ class NotificadorCliente(Observador):
 
 
 class PainelCozinha(Observador):                       
+    def atualizar(self, pedido: "Pedido", status: str) -> None:
+        itens = ", ".join(item.descricao() for item in pedido.itens) or "sem itens"
+        print(
+            f"[Cozinha] Pedido {_numero(pedido)} ({pedido.tipo}) -> "
+            f"{_status_legivel(status)} | Itens: {itens}"
+        )
+        def _status_legivel(status: str) -> str:
+    """Transforma 'a_caminho' em 'A caminho' para mostrar na tela."""
+    return status.replace("_", " ").capitalize()
+
+
+def _numero(pedido: "Pedido") -> str:
+    """Pedido ainda não salvo no banco não tem id."""
+    return f"#{pedido.id}" if pedido.id is not None else "(novo)"
+
+
+class NotificadorCliente(Observador):
+    def atualizar(self, pedido: "Pedido", status: str) -> None:
+        print(
+            f"[Cliente] {pedido.cliente.nome}, "
+            f"seu pedido {_numero(pedido)} agora está: {_status_legivel(status)}"
+        )
+
+
+class PainelCozinha(Observador):
     def atualizar(self, pedido: "Pedido", status: str) -> None:
         itens = ", ".join(item.descricao() for item in pedido.itens) or "sem itens"
         print(
