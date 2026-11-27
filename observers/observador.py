@@ -28,11 +28,24 @@ class NotificadorCliente(Observador):
 
 
 class PainelCozinha(Observador):
-    """Painel da cozinha: mostra o pedido, o tipo e o novo status."""
-
     def atualizar(self, pedido: "Pedido", status: str) -> None:
         itens = ", ".join(item.descricao() for item in pedido.itens) or "sem itens"
         print(
             f"[Cozinha] Pedido {_numero(pedido)} ({pedido.tipo}) -> "
             f"{_status_legivel(status)} | Itens: {itens}"
         )
+
+class LogSistema(Observador):
+    def atualizar(self, pedido: "Pedido", status: str) -> None:
+        if pedido.id is None:
+            raise ValueError(
+                "Salve o pedido antes de registrar o log: ele ainda não tem id"
+            )
+
+        conexao = ConexaoBanco.obter()
+        conexao.execute(
+            "INSERT INTO historico_status (pedido_id, status) VALUES (?, ?)",
+            (pedido.id, status),
+        )
+        conexao.commit()
+
