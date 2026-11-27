@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from database.conexao import ConexaoBanco 
+
 if TYPE_CHECKING:  
     from models.pedido import Pedido
 
