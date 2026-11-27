@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 
+from config.configuracao import Configuracao
 from models.pedido import Pedido
 
 
@@ -19,8 +21,8 @@ class EstrategiaFrete(ABC):
 class FreteFixo(EstrategiaFrete):
     nome = "fixo"
 
-    def __init__(self, valor: float = 8.0) -> None:  # AJUSTAR: valor padrão
-        self._valor = valor
+    def __init__(self, valor: Optional[float] = None) -> None:
+        self._valor = valor if valor is not None else Configuracao().frete_base
 
     def calcular(self, pedido: Pedido) -> float:
         return self._valor
@@ -50,10 +52,14 @@ class FreteGratis(EstrategiaFrete):
 
     def __init__(
         self,
-        frete_gratis_acima: float,
-        frete_base: EstrategiaFrete = None,
+        frete_gratis_acima: Optional[float] = None,
+        frete_base: Optional[EstrategiaFrete] = None,
     ) -> None:
-        self._limite = frete_gratis_acima
+        self._limite = (
+            frete_gratis_acima
+            if frete_gratis_acima is not None
+            else Configuracao().frete_gratis_acima
+        )
         self._frete_base = frete_base if frete_base is not None else FreteFixo()
 
     def calcular(self, pedido: Pedido) -> float:
